@@ -5,11 +5,16 @@ on:
     branches:
       - main
 
+    paths:
+      - 'frontend/**'
+      - 'backend/**'
+
 jobs:
   build_and_push_frontend:
     name: Build and Push frontend Docker Image to ECR
-    if: 'contains(github.event.head_commit.modified, frontend)'
     runs-on: ubuntu-latest
+    if: github.event_path == 'frontend/Dockerfile' 
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -37,8 +42,9 @@ jobs:
 
   build_and_push_backend:
     name: Build and Push backend Docker Image to ECR
-    if: 'contains(github.event.head_commit.modified, backend)'
     runs-on: ubuntu-latest
+    if: github.event_path == 'backend/Dockerfile'
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
