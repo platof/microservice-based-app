@@ -1,0 +1,98 @@
+name: Update Deployment with ArgoCD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_and_push_frontend:
+    name: Build and Push frontend Docker Image to ECR
+    if: 'contains(github.event.head_commit.modified, "frontend/")'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Extract version from package.json
+        uses: sergeysova/jq-action@v2
+        id: version
+        with:
+          cmd: 'jq .version package.json -r'   
+
+      - name: Build Docker image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          FE_ECR_REPOSITORY: ${{ secrets.FE_REPO_NAME }}
+          IMAGE_TAG: ${{ steps.version.outputs.value }}
+        run: |
+          docker build -t $ECR_REGISTRY/$FE_ECR_REPOSITORY:$IMAGE_TAG -f frontend/Dockerfile .
+          
+      - name: Push Docker image to ECR
+        run: docker push $ECR_REGISTRY/$FE_ECR_REPOSITORY:$IMAGE_TAG
+
+  build_and_push_backend:
+    name: Build and Push backend Docker Image to ECR
+    if: 'contains(github.event.head_commit.modified, "backend/")'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Extract version from package.json
+        uses: sergeysova/jq-action@v2
+        id: version
+        with:
+          cmd: 'jq .version package.json -r'
+
+      - name: Build Docker image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          BE_ECR_REPOSITORY: ${{ secrets.BE_REPO_NAME }}
+          IMAGE_TAG: ${{ steps.version.outputs.value }}
+        run: |
+          docker build -t $ECR_REGISTRY/$BE_ECR_REPOSITORY:$IMAGE_TAG -f backend/Dockerfile .
+
+      - name: Push Docker image to ECR
+        run: docker push $ECR_REGISTRY/$BE_ECR_REPOSITORY:$IMAGE_TAG
+
+  update_argocd_manifest:
+    name: Update ArgoCD Manifest with New Images
+    runs-on: ubuntu-latest
+    needs: [build_and_push_frontend, build_and_push_backend]
+    steps:
+      - name: Checkout ArgoCD repository
+        uses: actions/checkout@v2
+        with:
+          repository: argocd-setup
+          ref: main
+
+      - name: Update frontend image tag in manifests
+        if: always() && steps.build_and_push_frontend.outputs['outcome'] == 'success'
+        run: |
+          # Write script to update frontend image tag in YAML manifests
+          # Example:
+          # sed -i 's|image: your-old-image-name:latest|image: new-image-name:latest|g' frontend/deploment.yaml
+
+      - name: Update backend image tag in manifests
+        if: always() && steps.build_and_push_backend.outputs['outcome'] == 'success'
+        run: |
+          # Write script to update backend image tag in YAML manifests
+          # Example:
+          # sed -i 's|image: your-old-image-name:latest|image: new-image-name:latest|g' backend/deploment.yaml
+
+      - name: Commit and push updated manifest
+        run: |
+          git config --global user.email "femmie009@yahoo.com"
+          git config --global user.name "platof"
+          git add .
+          git commit -m "Update Docker images in ArgoCD manifest"
+          git push origin main

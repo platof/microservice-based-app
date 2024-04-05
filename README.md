@@ -48,5 +48,3 @@ You can create the database tables by:
    1.1. Run `npm run db:reset:localhost`, or
 
    1.2. Run `npm run db:reset:production`
-
-**These commands will DROP ALL THE DATABASE TABLES. Make sure you are running it pointing to the correct database.**
