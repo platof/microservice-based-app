@@ -10,7 +10,6 @@ jobs:
   build_and_push_frontend:
     name: Build and Push frontend Docker Image to AWS ECR
     runs-on: ubuntu-latest
-    if: github.event_path == 'frontend/' 
 
     steps:
       - name: Checkout code
