@@ -33,22 +33,22 @@ jobs:
           cmd: 'jq .version package.json -r'   
 
       - name: Build and Push Docker image
-        if: startsWith(github.event_path, 'frontend/')
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ secrets.FE_REPO_NAME }}
           IMAGE_TAG: ${{ steps.version.outputs.value }}
+        if: ${{ contains(github.event_path, 'frontend') }}
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f frontend/Dockerfile .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
-      - name: Build and Push Docker image
-        if: startsWith(github.event_path, 'backend/')
+      - name: Build and Push Docker image    
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ secrets.BE_REPO_NAME }}
           IMAGE_TAG: ${{ steps.version.outputs.value }}
+        if: startsWith(github.event_path, 'backend/')
         run: |
             docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f backend/Dockerfile .
             docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
