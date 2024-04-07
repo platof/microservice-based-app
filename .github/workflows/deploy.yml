@@ -35,13 +35,13 @@ jobs:
       - name: Build Docker image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          FE_ECR_REPOSITORY: ${{ secrets.FE_REPO_NAME }}
+          ECR_REPOSITORY: ${{ secrets.FE_REPO_NAME }}
           IMAGE_TAG: ${{ steps.version.outputs.value }}
         run: |
-          docker build -t $ECR_REGISTRY/$FE_ECR_REPOSITORY:$IMAGE_TAG -f frontend/Dockerfile .
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f frontend/Dockerfile .
           
       - name: Push Docker image to ECR
-        run: docker push $ECR_REGISTRY/$FE_ECR_REPOSITORY:$IMAGE_TAG
+        run: docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
   build_and_push_backend:
     name: Build and Push backend Docker Image to ECR
