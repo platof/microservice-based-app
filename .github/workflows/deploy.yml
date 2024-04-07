@@ -38,7 +38,7 @@ jobs:
           ECR_REPOSITORY: ${{ secrets.FE_REPO_NAME }}
           IMAGE_TAG: ${{ steps.version.outputs.value }}
         run: |
-          echo "The value of github.action_path is: ${{ github.action_path }}"
+          echo "Path to backend directory: $(pwd)/backend"
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f frontend/Dockerfile .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
