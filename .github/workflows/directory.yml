@@ -1,0 +1,25 @@
+name: Collect Directory Names
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  collect_directory_names:
+    name: Collect Backend and Frontend Directory Names
+    runs-on: ubuntu-latest
+    outputs:
+      backend-directory: ${{ steps.get-backend-directory-names.outputs.directory-names }}
+      frontend-directory: ${{ steps.get-frontend-directory-names.outputs.directory-names }}
+
+    steps:
+      - name: Get backend directory name
+        id: get-backend-directory-names
+        run: |
+          echo "::set-output name=directory-names::$(find backend -mindepth 1 -maxdepth 1 -type d | xargs basename)"
+      
+      - name: Get frontend directory name
+        id: get-frontend-directory-names
+        run: |
+          echo "::set-output name=directory-names::$(find frontend -mindepth 1 -maxdepth 1 -type d | xargs basename)"
