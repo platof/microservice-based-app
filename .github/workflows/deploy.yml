@@ -37,8 +37,8 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ secrets.FE_REPO_NAME }}
           IMAGE_TAG: ${{ steps.version.outputs.value }}
-        if: github.event_path == 'frontend/'
         run: |
+          echo "The value of github.event_path is: ${{ github.event_path }}"
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f frontend/Dockerfile .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
@@ -48,7 +48,7 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ secrets.BE_REPO_NAME }}
           IMAGE_TAG: ${{ steps.version.outputs.value }}
-        if: startsWith(github.event_path, 'backend/')
+        if: ${{ github.event_path == 'backend' }}
         run: |
             docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f backend/Dockerfile .
             docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
