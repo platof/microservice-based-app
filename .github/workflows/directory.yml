@@ -6,20 +6,14 @@ on:
       - main
 
 jobs:
-  collect_directory_names:
-    name: Collect Backend and Frontend Directory Names
+  test:
     runs-on: ubuntu-latest
-    outputs:
-      backend-directory: ${{ steps.get-backend-directory-names.outputs.directory-names }}
-      frontend-directory: ${{ steps.get-frontend-directory-names.outputs.directory-names }}
-
+    name: Test Collect Directory Names action
     steps:
-      - name: Get backend directory name
-        id: get-backend-directory-names
-        run: |
-          echo "::set-output name=directory-names::$(find backend -mindepth 1 -maxdepth 1 -type d | xargs basename)"
+      - name: Get directory names
+        id: get-directory-names
+        uses: actions/collect-directory-names-by-file-glob@v1.1
+            
       
-      - name: Get frontend directory name
-        id: get-frontend-directory-names
-        run: |
-          echo "::set-output name=directory-names::$(find frontend -mindepth 1 -maxdepth 1 -type d | xargs basename)"
+      - name: Use Directory Names
+        run: echo "Directory Names are ${{ steps.get-directory-names.outputs.directory-names}}
