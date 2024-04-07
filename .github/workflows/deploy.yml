@@ -37,7 +37,7 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ secrets.FE_REPO_NAME }}
           IMAGE_TAG: ${{ steps.version.outputs.value }}
-        if: ${{ contains(github.event_path, 'frontend') }}
+        if: github.event_path == 'frontend/'
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f frontend/Dockerfile .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
