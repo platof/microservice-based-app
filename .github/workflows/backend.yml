@@ -49,20 +49,18 @@ jobs:
       - name: Checkout ArgoCD repository
         uses: actions/checkout@v2
         with:
-          repository: argocd-setup
+          repository: platof/argocd-setup
           ref: main
 
       - name: Update backend image tag in manifests
-        if: always() && steps.build_and_push_backend.outputs['outcome'] == 'success'
         run: |
           # Write script to update backend image tag in YAML manifests
-          # Example:
-          # sed -i 's|image: your-old-image-name:latest|image: new-image-name:latest|g' backend/deploment.yaml
+          sed -i 's|image: your-old-image-name:latest|image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|g' app/backend/deploment.yaml
 
       - name: Commit and push updated manifest
         run: |
           git config --global user.email "femmie009@yahoo.com"
           git config --global user.name "platof"
           git add .
-          git commit -m "Update Docker images in ArgoCD manifest"
+          git commit -m "Update Backend Docker image in ArgoCD manifest"
           git push origin main
