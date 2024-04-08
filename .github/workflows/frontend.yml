@@ -57,6 +57,12 @@ jobs:
         
       - name: Debugging - Echo content of deployment.yaml before updating
         run: cat my-app/frontend/deployment.yaml
+
+      - name: Debug ECR_REGISTRY, ECR_REPOSITORY, and IMAGE_TAG
+        run: |
+          echo "ECR_REGISTRY: $ECR_REGISTRY"
+          echo "ECR_REPOSITORY: $ECR_REPOSITORY"
+          echo "IMAGE_TAG: $IMAGE_TAG"
         
       - name: Update frontend image tag in manifests
         env:
@@ -65,7 +71,7 @@ jobs:
           IMAGE_TAG: ${{ steps.version.outputs.value }}
         run: |
           # Write script to update frontend image tag in YAML manifests
-          sed -i 's|image: .*:latest|image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|g' my-app/frontend/deployment.yaml
+          sed -i "s|image: .*:latest|image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|g" my-app/frontend/deployment.yaml
 
       - name: Debugging - Echo content of deployment.yaml after updating
         run: cat my-app/frontend/deployment.yaml
@@ -76,6 +82,6 @@ jobs:
           git config --global user.name "platof"
           git add .
           git commit -m "Update Frontend Docker images in ArgoCD manifest"
-          git push https://github.com/platof/argocd-setup.git HEAD:main
+          git push ${{ secrets.GIT_TOKEN }}@github.com/platof/argocd-setup.git HEAD:main
         env:
           GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
