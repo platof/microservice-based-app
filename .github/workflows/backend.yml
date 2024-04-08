@@ -55,7 +55,7 @@ jobs:
       - name: Update backend image tag in manifests
         run: |
           # Write script to update backend image tag in YAML manifests
-          sed -i 's|image: your-old-image-name:latest|image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|g' app/backend/deploment.yaml
+          sed -i 's|image: your-old-image-name:latest|image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|g' my-app/backend/deploment.yaml
 
       - name: Commit and push updated manifest
         run: |
