@@ -52,10 +52,19 @@ jobs:
           repository: platof/argocd-setup
           ref: main
 
+      - name: Debugging - List contents of frontend directory
+        run: ls -l my-app/frontend
+        
+      - name: Debugging - Echo content of deployment.yaml before updating
+        run: cat my-app/frontend/deployment.yaml
+        
       - name: Update frontend image tag in manifests
         run: |
           # Write script to update frontend image tag in YAML manifests
           sed -i 's|image: your-old-image-name:latest|image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|g' my-app/frontend/deployment.yaml
+
+      - name: Debugging - Echo content of deployment.yaml after updating
+        run: cat my-app/frontend/deployment.yaml
 
       - name: Commit and push updated manifest
         run: |
