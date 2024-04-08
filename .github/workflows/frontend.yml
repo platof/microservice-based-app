@@ -32,6 +32,7 @@ jobs:
           cmd: 'jq .version package.json -r'   
 
       - name: Build and Push Frontend Docker image
+        id: build_and_push_frontend
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ secrets.FE_REPO_NAME }}
@@ -71,9 +72,9 @@ jobs:
           ECR_REPOSITORY: ${{ secrets.FE_REPO_NAME }}
           IMAGE_TAG: ${{ steps.version.outputs.value }}
         run: |
-          echo "IMAGE_TAG: $image"
+          echo "The image is ${{ steps.build_and_push_frontend.outputs.image }}"
           # Write script to update frontend image tag in YAML manifests
-          sed -i "s|image: .*:latest|image: $image|g" my-app/frontend/deployment.yaml
+          sed -i "s|image: .*:latest|image: ${{ steps.build_and_push_frontend.outputs.image }}|g" my-app/frontend/deployment.yaml
 
       - name: Debugging - Echo content of deployment.yaml after updating
         run: cat my-app/frontend/deployment.yaml
