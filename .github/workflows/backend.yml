@@ -27,13 +27,7 @@ jobs:
 
       - id: commit
         uses: pr-mpt/actions-commit-hash@v1
-
-      - name: Extract version from package.json
-        uses: sergeysova/jq-action@v2
-        id: version
-        with:
-          cmd: 'jq .version package.json -r'   
-
+   
       - name: Build and Push Backend Docker image    
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
@@ -59,6 +53,7 @@ jobs:
           ECR_REPOSITORY: ${{ vars.BE_REPO_NAME }}
           IMAGE_TAG: ${{ steps.commit.outputs.short }}
         run: |
+          # Write script to update backend image tag in YAML manifests
           sed -i "s|image: .*:[^ ]*|image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|g" my-app/backend/deployment.yaml
 
       - name: Commit and push updated manifest
