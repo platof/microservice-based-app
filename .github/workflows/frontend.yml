@@ -71,12 +71,11 @@ jobs:
                   
       - name: Update frontend image tag in manifests
         env:
-          ECR_REGISTRY: ${{ needs.login-ecr.outputs.registry }}
+          ECR_REGISTRY: ${{ needs.build_and_push_frontend.outputs.ECR_REGISTRY }}
           ECR_REPOSITORY: ${{ vars.FE_REPO_NAME }}
-          IMAGE_TAG: ${{ needs.version.outputs.value }}
+          IMAGE_TAG: ${{ needs.build_and_push_frontend.outputs.IMAGE_TAG }}
         run: |
           echo "The image is $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-          echo ${{ needs.GITHUB_OUTPUT }}
           # Write script to update frontend image tag in YAML manifests
           sed -i "s|image: .*:latest|image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|g" my-app/frontend/deployment.yaml
 
