@@ -61,7 +61,7 @@ jobs:
         run: |
           echo "The image is $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
           # Write script to update frontend image tag in YAML manifests
-          sed -i "s|image: .*:latest|image: $IMAGE_TAG|g" my-app/frontend/deployment.yaml
+          sed -i "s|image: .*:latest|image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|g" my-app/frontend/deployment.yaml
 
       - name: Debugging - Echo content of deployment.yaml after updating
         run: cat my-app/frontend/deployment.yaml
