@@ -42,7 +42,8 @@ jobs:
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f frontend/Dockerfile .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          echo "{image}={$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG}" >> $GITHUB_OUTPUT
+          echo "$GITHUB_OUTPUT"
 
   update_argocd_manifest:
     name: Update ArgoCD Manifest with New Images
@@ -52,6 +53,7 @@ jobs:
       - name: Checkout ArgoCD repository
         uses: actions/checkout@v3
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           repository: platof/argocd-setup
           ref: main
 
@@ -75,6 +77,8 @@ jobs:
           IMAGE_TAG: ${{ steps.version.outputs.value }}
         run: |
           echo "The image is ${{ needs.build_and_push_frontend.outputs.image }}"
+          echo "$GITHUB_OUTPUT"
+          echo ${{ needs.build_and_push_frontend.outputs.GITHUB_OUTPUT }}
           # Write script to update frontend image tag in YAML manifests
           sed -i "s|image: .*:latest|image: ${{ needs.build_and_push_frontend.outputs.image }}|g" my-app/frontend/deployment.yaml
 
@@ -87,6 +91,5 @@ jobs:
           git config --global user.name "platof"
           git add .
           git commit -m "Update Frontend Docker images in ArgoCD manifest"
-          git push https://${{ secrets.GIT_TOKEN }}@github.com/platof/argocd-setup.git HEAD:main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
+          git push origin main
+        
