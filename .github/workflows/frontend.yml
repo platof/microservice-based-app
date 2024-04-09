@@ -5,6 +5,8 @@ on:
       - main
     paths:
       - 'frontend/**'
+permissions:
+  contents: write
 jobs:
   build_and_push_frontend:
     name: Build and Push frontend Docker Image to AWS ECR
@@ -48,7 +50,7 @@ jobs:
     needs: [build_and_push_frontend]
     steps:
       - name: Checkout ArgoCD repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: platof/argocd-setup
           ref: main
@@ -72,9 +74,9 @@ jobs:
           ECR_REPOSITORY: ${{ secrets.FE_REPO_NAME }}
           IMAGE_TAG: ${{ steps.version.outputs.value }}
         run: |
-          echo "The image is ${{ steps.build_and_push_frontend.outputs.image }}"
+          echo "The image is ${{ needs.build_and_push_frontend.outputs.image }}"
           # Write script to update frontend image tag in YAML manifests
-          sed -i "s|image: .*:latest|image: ${{ steps.build_and_push_frontend.outputs.image }}|g" my-app/frontend/deployment.yaml
+          sed -i "s|image: .*:latest|image: ${{ needs.build_and_push_frontend.outputs.image }}|g" my-app/frontend/deployment.yaml
 
       - name: Debugging - Echo content of deployment.yaml after updating
         run: cat my-app/frontend/deployment.yaml
