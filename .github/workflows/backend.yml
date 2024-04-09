@@ -41,21 +41,20 @@ jobs:
             docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
             echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
           
-  update_argocd_manifest:
-    name: Update ArgoCD Manifest with New Images
-    runs-on: ubuntu-latest
-    needs: [build_and_push_backend]
-    steps:
       - name: Checkout ArgoCD repository
         uses: actions/checkout@v2
         with:
+          token: ${{ secrets.GIT_TOKEN }}
           repository: platof/argocd-setup
           ref: main
 
       - name: Update backend image tag in manifests
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.BE_REPO_NAME }}
+          IMAGE_TAG: ${{ steps.version.outputs.value }}
         run: |
-          # Write script to update backend image tag in YAML manifests
-          sed -i 's|image: .*:latest|image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|g' my-app/backend/deployment.yaml
+          sed -i 's|image: .*:[^ ]*|image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|g' my-app/backend/deployment.yaml
 
       - name: Commit and push updated manifest
         run: |
