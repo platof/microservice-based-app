@@ -47,9 +47,9 @@ jobs:
           echo "::set-output name=IMAGE_TAG::$IMAGE_TAG"
   
       - name: Checkout ArgoCD repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GIT_TOKEN }}
           repository: platof/argocd-setup
           ref: main
                   
@@ -59,7 +59,6 @@ jobs:
           ECR_REPOSITORY: ${{ vars.FE_REPO_NAME }}
           IMAGE_TAG: ${{ steps.version.outputs.value }}
         run: |
-          echo "The image is $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
           # Write script to update frontend image tag in YAML manifests
           sed -i "s|image: .*:[^ ]*|image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|g" my-app/frontend/deployment.yaml
 
