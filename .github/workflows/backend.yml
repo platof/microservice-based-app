@@ -34,12 +34,14 @@ jobs:
       - name: Build and Push Backend Docker image    
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{ secrets.BE_REPO_NAME }}
+          ECR_REPOSITORY: ${{ vars.BE_REPO_NAME }}
           IMAGE_TAG: ${{ steps.version.outputs.value }}
         run: |
             docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f backend/Dockerfile .
             docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
             echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+            echo "::set-output name=ECR_REGISTRY::$ECR_REGISTRY"
+            echo "::set-output name=IMAGE_TAG::$IMAGE_TAG"
           
       - name: Checkout ArgoCD repository
         uses: actions/checkout@v2
@@ -51,10 +53,10 @@ jobs:
       - name: Update backend image tag in manifests
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{ secrets.BE_REPO_NAME }}
+          ECR_REPOSITORY: ${{ vars.BE_REPO_NAME }}
           IMAGE_TAG: ${{ steps.version.outputs.value }}
         run: |
-          sed -i 's|image: .*:[^ ]*|image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|g' my-app/backend/deployment.yaml
+          sed -i "s|image: .*:[^ ]*|image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|g" my-app/backend/deployment.yaml
 
       - name: Commit and push updated manifest
         run: |
